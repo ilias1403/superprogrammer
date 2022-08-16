@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "208949321234",
+    "project_id": "superprogrammer-e9f28",
+    "storage_bucket": "superprogrammer-e9f28.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208949321234:android:a57b8ec51dd8cd40acc2cb",
+        "android_client_info": {
+          "package_name": "com.superprogrammer.ilias"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "208949321234-csidsobt0qf0ro930691388hh4umdi2o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpPbPIE_cL85W1L0J8EK2Fb0njFvrFDPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "208949321234-csidsobt0qf0ro930691388hh4umdi2o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

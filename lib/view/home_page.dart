@@ -1,11 +1,12 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:ilias/controller/student.dart';
-import 'package:ilias/model/student_m.dart';
-import 'package:ilias/view/add_student_v.dart';
-import 'package:ilias/view/edit_student_v.dart';
 import 'package:ilias/view/notification_v.dart';
-import 'package:ilias/view/login_v.dart';
+import 'package:ilias/view/login/login_v.dart';
+import 'package:ilias/controller/quote.dart';
+import 'package:ilias/model/quote_m.dart';
+import 'package:ilias/view/login/login_v.dart';
+import 'package:ilias/view/quote/add_quote_v.dart';
+import 'package:ilias/view/quote/edit_quote_v.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,9 +16,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  RemoteService post = RemoteService();
-  List<Student>? posts;
+  QuoteController quote = QuoteController();
+  List<Quote>? quotes;
   var isLoaded = false;
+  // var tokens;
 
   @override
   void initState() {
@@ -26,13 +28,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   getData() async {
-    posts = await RemoteService().getStudent();
-    if (posts != null) {
+    quotes = await QuoteController().getQuoteList();
+    // String? token = await FirebaseMessaging.instance.getToken();
+
+    if (quotes != null) {
       setState(() {
         isLoaded = true;
+        // tokens = token;
       });
     }
-    // String? token = await FirebaseMessaging.instance.getToken();
     // print("Log : $token");
   }
 
@@ -42,6 +46,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           // The title text which will be shown on the action bar
           title: const Text('Home Page'),
+          automaticallyImplyLeading: false,
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
@@ -49,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AddStudent()),
+                  MaterialPageRoute(builder: (context) => const AddQuote()),
                 );
               },
             ),
@@ -64,32 +69,25 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.people_alt_rounded),
-              // onPressed: () => Navigator.of(context).popAndPushNamed('/add'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MyLogin()),
-                );
-              },
-            )
+                icon: const Icon(Icons.logout_rounded),
+                // onPressed: () => Navigator.of(context).popAndPushNamed('/add'),
+                onPressed: logout)
           ],
         ),
         body: Visibility(
           visible: isLoaded,
           child: ListView.builder(
-              itemCount: posts?.length,
+              itemCount: quotes?.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => EditStudent(
-                                id: posts![index].id,
-                                student_name: posts![index].studentName,
-                                student_age: posts![index].studentAge,
-                                student_id: posts![index].studentId,
+                          builder: (context) => EditQuote(
+                                id: quotes![index].quoteId,
+                                quote: quotes![index].quote,
+                                author: quotes![index].author,
                               )),
                     );
                   },
@@ -97,17 +95,20 @@ class _HomePageState extends State<HomePage> {
                     child: ListTile(
                       leading: const CircleAvatar(
                         radius: 30.0,
-                        backgroundImage: NetworkImage(
-                            'https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png'),
+                        // backgroundImage: AssetImage('assets/images/avatar.png'),
                       ),
-                      title: Text(posts![index].studentName),
-                      subtitle: Text(posts![index].studentId),
+                      title: Text(quotes![index].quote),
+                      subtitle: Text(quotes![index].author),
                       trailing: IconButton(
                           onPressed: () async {
                             bool response =
-                                await post.deleteStudentbyID(posts![index].id);
+                                await quote.deleteQuote(quotes![index].quoteId);
                             if (response) {
-                              Navigator.pushReplacementNamed(context, "/home");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomePage()),
+                              );
                             } else {
                               print('Failed');
                             }
@@ -121,5 +122,18 @@ class _HomePageState extends State<HomePage> {
             child: CircularProgressIndicator(),
           ),
         ));
+  }
+
+  void logout() async {
+    // logout from the server ...
+
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    localStorage.remove('user');
+    localStorage.remove('token');
+    print('logout');
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const MyLogin()),
+      (_) => false,
+    );
   }
 }

@@ -1,4 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:ilias/controller/user.dart';
+import 'package:ilias/view/home_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key}) : super(key: key);
@@ -8,6 +13,13 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
+  // ignore: unused_field
+  bool _isLoading = false;
+  var tokens;
+
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,6 +45,7 @@ class _MyLoginState extends State<MyLogin> {
                   top: MediaQuery.of(context).size.height * 0.5),
               child: Column(children: [
                 TextField(
+                  controller: usernameController,
                   decoration: InputDecoration(
                     fillColor: Colors.grey.shade100,
                     filled: true,
@@ -46,6 +59,7 @@ class _MyLoginState extends State<MyLogin> {
                   height: 30,
                 ),
                 TextField(
+                  controller: passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     fillColor: Colors.grey.shade100,
@@ -75,7 +89,7 @@ class _MyLoginState extends State<MyLogin> {
                       backgroundColor: const Color(0xff4c505b),
                       child: IconButton(
                         color: Colors.white,
-                        onPressed: () {},
+                        onPressed: _isLoading ? null : _login,
                         icon: const Icon(Icons.arrow_forward),
                       ),
                     ),
@@ -90,5 +104,36 @@ class _MyLoginState extends State<MyLogin> {
         ]),
       ),
     );
+  }
+
+  void _login() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    setState(() {
+      _isLoading = true;
+      tokens = token;
+    });
+
+    var data = {
+      'username': usernameController.text,
+      'password': passwordController.text,
+      'fcm_token': tokens,
+    };
+    // print("Log : $data");
+    var res = await UserController().postDataUser(data);
+    if (res['status'] == 'success') {
+      // print(res);
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      localStorage.setString('token', res['user']['fcm_token']);
+      localStorage.setString('user', json.encode(res['user']));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
+    } else {
+      // _showMsg(body['message']);
+      print("Xleh");
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

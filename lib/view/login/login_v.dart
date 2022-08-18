@@ -4,6 +4,8 @@ import 'package:ilias/controller/user.dart';
 import 'package:ilias/view/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io' show Platform;
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key}) : super(key: key);
@@ -108,6 +110,12 @@ class _MyLoginState extends State<MyLogin> {
 
   void _login() async {
     String? token = await FirebaseMessaging.instance.getToken();
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final deviceInfo = await deviceInfoPlugin.deviceInfo;
+    final map = deviceInfo.toMap();
+    final device = json.encode(map);
+    String os = Platform.operatingSystem;
+
     setState(() {
       _isLoading = true;
       tokens = token;
@@ -117,8 +125,10 @@ class _MyLoginState extends State<MyLogin> {
       'username': usernameController.text,
       'password': passwordController.text,
       'fcm_token': tokens,
+      "os": os,
+      'device_info': device
     };
-    // print("Log : $data");
+
     var res = await UserController().postDataUser(data);
     if (res['status'] == 'success') {
       // print(res);

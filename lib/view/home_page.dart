@@ -84,11 +84,8 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => EditQuote(
-                                id: quotes![index].quoteId,
-                                quote: quotes![index].quote,
-                                author: quotes![index].author,
-                              )),
+                          builder: (context) =>
+                              EditQuote(id: quotes![index].quoteId)),
                     );
                   },
                   child: Card(

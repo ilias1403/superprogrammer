@@ -40,6 +40,21 @@ class QuoteController {
     }
   }
 
+  Future getQuoteById(id) async {
+    var data = {
+      "quote_id": id,
+    };
+    var response = await client.post(
+        Uri.parse(globals.Api_base_url + '/super/get_quote_by_id'),
+        body: data);
+    var jsons = json.decode(response.body);
+    if (response.statusCode == 200) {
+      return jsons;
+    } else {
+      return false;
+    }
+  }
+
   Future deleteQuote(id) async {
     var data = {
       "quote_id": id,
